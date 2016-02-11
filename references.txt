@@ -1,2 +1,3 @@
 Portable time delay in c: http://c-for-dummies.com/blog/?p=69
 Extending Ruby: http://media.pragprog.com/titles/ruby3/ext_ruby.pdf
+Capturing STDIO: http://thinkingdigitally.com/archive/capturing-output-from-puts-in-ruby/
