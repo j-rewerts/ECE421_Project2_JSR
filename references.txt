@@ -1,3 +1,12 @@
 Portable time delay in c: http://c-for-dummies.com/blog/?p=69
 Extending Ruby: http://media.pragprog.com/titles/ruby3/ext_ruby.pdf
 Capturing STDIO: http://thinkingdigitally.com/archive/capturing-output-from-puts-in-ruby/
+
+Shell Commands (Ruby): http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby
+Quite rm: http://superuser.com/questions/76061/how-do-i-make-rm-not-give-an-error-if-a-file-doesnt-exist
+Assert in delta: http://apidock.com/ruby/Test/Unit/Assertions/assert_in_delta
+Ruby Modules: http://www.tutorialspoint.com/ruby/ruby_modules.htm
+
+While Loop: http://www.tutorialspoint.com/ruby/ruby_loops.htm
+Cohesion : http://gamedevelopment.tutsplus.com/tutorials/quick-tip-the-oop-principle-of-cohesion--gamedev-1811
+
