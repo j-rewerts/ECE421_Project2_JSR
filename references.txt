@@ -10,3 +10,10 @@ Ruby Modules: http://www.tutorialspoint.com/ruby/ruby_modules.htm
 While Loop: http://www.tutorialspoint.com/ruby/ruby_loops.htm
 Cohesion : http://gamedevelopment.tutsplus.com/tutorials/quick-tip-the-oop-principle-of-cohesion--gamedev-1811
 
+Ruby Inotify: http://www.rubydoc.info/gems/rb-inotify/0.9.5
+Man Pages: http://man7.org/linux/man-pages/man7/inotify.7.html
+find: http://stackoverflow.com/questions/19697359/ruby-debug-could-not-create-makefile-due-to-some-reason-probably-lack-of-necess
+gcc: http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04
+ln : http://stackoverflow.com/questions/16710047/usr-bin-ld-cannot-find-lnameofthelibrary
+Rb-inotify: https://github.com/nex3/rb-inotify
+

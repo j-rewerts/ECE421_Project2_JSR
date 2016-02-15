@@ -4,8 +4,6 @@ require_relative "fileWatch/fileWatch.rb"
 include FileWatch
 class Project2Test < Test::Unit::TestCase
 
-    @success = 0
-
     def test_message_bad_input
         message = "message"
 
@@ -34,6 +32,153 @@ class Project2Test < Test::Unit::TestCase
         assert_equal($?.exitstatus, 0, "couldn't create file")
         assert(created)
         `rm -f #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove file")
+    end
+
+    def test_file_watch_creation_no_timing_2
+        fileName = "test_file_watch_creation_file11.txt"
+        duration = 1
+
+        assert_raise FileNotFound do
+            FileWatchCreation(
+                duration,
+                fileName) {|f| `echo "addition" > #{f}` if f == fileName}
+            `rm -f #{fileName}`
+            `touch #{fileName}`
+            assert_equal($?.exitstatus, 0, "couldn't create file")
+            `rm -f #{fileName}`
+            assert_equal($?.exitstatus, 0, "couldn't remove file")
+            sleep(1.5)
+            # throw exception
+        end
+    end
+
+    def test_file_watch_creation_no_timing_3
+        fileName1 = "test_file_watch_creation_file111.txt"
+        fileName2 = "test_file_watch_creation_file112.txt"
+        files = fileName1+","+fileName2
+        duration = 1
+        total = 0
+        FileWatchCreation(
+            duration,
+            files){|f| total = total + fileName1.hash}
+
+        `rm -f #{fileName1} #{fileName2}`
+        `touch #{fileName1} #{fileName2}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
+
+        sleep(2)
+        assert_equal(fileName1.hash + fileName2.hash, total)
+        `rm -f #{fileName1} #{fileName2}`
+        assert_equal($?.exitstatus, 0, "couldn't remove file")
+    end
+
+    def test_file_watch_all
+        fileName1 = "test_file1.txt"
+        duration = 1
+        created = false
+        altered = false
+        destroyed = false
+
+        FileWatchCreation(
+            duration,
+            fileName1
+        ){|f| created = true if f == fileName1}
+
+        FileWatchAlter(
+            duration,
+            fileName1
+        ){|f| altered = true if f == fileName1}
+
+        FileWatchDestroy(
+            duration,
+            fileName1
+        ){|f| destroyed = true if f == fileName1}
+        assert( ! created)
+        assert( ! altered)
+        assert( ! destroyed)
+
+        `rm -rf #{fileName1}`
+        `touch #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
+        sleep(1.1)
+        assert(created)
+
+        `echo "edit" > #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't edit file")
+        sleep(1.1)
+        assert(altered)
+
+        `rm -rf #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't remove file")
+        sleep(1.1)
+        assert(destroyed)
+
+    end
+
+    def test_file_watch_all2
+        fileName1 = "test_file2.txt"
+        `rm -rf #{fileName1}`
+
+        duration = 1
+        created = false
+        altered = false
+        destroyed = false
+
+        FileWatchCreation(
+            duration,
+            fileName1
+        ){|f| created = true if f == fileName1}
+
+        FileWatchAlter(
+            duration,
+            fileName1
+        ){|f| altered = true if f == fileName1}
+
+        FileWatchDestroy(
+            duration,
+            fileName1
+        ){|f| destroyed = true if f == fileName1}
+        assert( ! created)
+        assert( ! altered)
+        assert( ! destroyed)
+
+        `touch #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
+        sleep(1.1)
+        assert(created)
+
+        `echo "edit" > #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't edit file")
+        sleep(1.1)
+        assert(altered)
+
+        `rm -rf #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't remove file")
+        sleep(1.1)
+        assert(destroyed)
+
+    end
+
+
+
+    def test_file_watch_creation_no_timing_4
+        fileName1 = "test_file_watch_creation_file113.txt"
+        fileName2 = "test_file_watch_creation_file114.txt"
+        files = [fileName1,fileName2]
+        duration = 1
+        total = 0
+        FileWatchCreation(
+            duration,
+            files){|f| total = total + fileName1.hash}
+
+        `rm -f #{fileName1} #{fileName2}`
+        `touch #{fileName1} #{fileName2}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
+
+        sleep(2)
+        assert_equal(fileName1.hash + fileName2.hash, total)
+        `rm -f #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
 
@@ -133,6 +278,31 @@ class Project2Test < Test::Unit::TestCase
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
 
+    def test_file_watch_creation_with_timing_2
+        created = false
+        fileName = "test_file_watch_creation_file61.txt"
+        duration = 2
+        FileWatchCreation(
+            duration,
+            fileName) {|f| created = true if f == fileName}
+        assert(!created)
+        before_creation = Time.now
+        `rm -f #{fileName}`
+        `touch #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
+        `rm -f #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove file")
+
+        while (Time.now - before_creation) < duration do
+            if created
+                assert(false, "Action activated before time duration")
+            end
+        end
+        after_creation = Time.now
+        assert(created)
+        assert_in_delta(duration, after_creation, 0.01)
+    end
+
     def test_file_watch_altered_with_timing
         altered = false
         fileName = "test_file_watch_alter_file7.txt"
@@ -183,6 +353,37 @@ class Project2Test < Test::Unit::TestCase
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
+
+    def test_file_watch_altered_with_timing3
+        altered = false
+        fileName = "test_file_watch_alter_file9.txt"
+        `rm -f #{fileName}`
+        `touch #{fileName}`
+        `echo "" > #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
+        duration = 3
+        FileWatchAlter(
+            duration,
+            fileName) {|f| altered = true if f == fileName}
+        assert(!altered)
+        before_alteration = Time.now
+        `echo "some crazy edit" >> #{fileName}`
+
+        sleep(1)
+        `echo "" > #{fileName}` # revert alteration
+
+        while (Time.now - before_alteration) < duration do
+            if altered
+                assert(false, "Action activated before time duration")
+            end
+        end
+        after_alteration = Time.now
+        assert(altered)
+        assert_in_delta(duration, after_alteration, 0.01)
+        `rm -f #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove file")
+    end
+
 
 end
 
