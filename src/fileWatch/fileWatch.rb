@@ -34,6 +34,8 @@ module FileWatch
                     end
                     if files_on_system.include? file
                         #act_thread = Thread.new do
+                        time_left = duration - (Time.now - File.ctime(file))
+                        sleep(time_left) if time_left > 0
                         action.call
                         #end
                         true
@@ -44,7 +46,11 @@ module FileWatch
         create_thread.priority = -1;
     end
 
-    def FileWatchAlter(duration, files, &action)
+    def FileWatchAlter(duration, files, &main_action)
+        action = Proc.new {
+            sleep(duration)
+            main_action.call
+        }
         begin
             watcher = INotify::Notifier.new
             case files
@@ -65,10 +71,15 @@ module FileWatch
                 raise FileNotFound
             end
         end
-        sleep(1)
+        #sleep(1)
     end
 
-    def FileWatchDestroy(duration, files, &action)
+    def FileWatchDestroy(duration, files, &main_action)
+        action = Proc.new {
+            sleep(duration)
+            main_action.call
+        }
+
         begin
             watcher = INotify::Notifier.new
             case files
@@ -89,7 +100,7 @@ module FileWatch
                 raise FileNotFound
             end
         end
-        sleep(1)
+        #sleep(1)
     end
 
 end
