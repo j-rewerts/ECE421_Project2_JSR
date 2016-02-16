@@ -25,3 +25,9 @@ ruby class fn : http://stackoverflow.com/questions/15769739/determining-type-of-
 ruby vars : http://www.tutorialspoint.com/ruby/ruby_variables.htm
 ruby each : http://ruby-doc.org/core-2.2.0/Array.html#method-i-each
 
+ruby file creation time : http://stackoverflow.com/questions/4009288/how-do-i-get-the-file-creation-time-in-ruby-on-windows
+ruby exception : http://stackoverflow.com/questions/3801469/how-to-catch-errnoeconnreset-class-in-case-when
+ruby excep handling : http://phrogz.net/programmingruby/tut_exceptions.html
+ruby blocks/procs : http://www.reactive.io/tips/2008/12/21/understanding-ruby-blocks-procs-and-lambdas/
+ruby array include :  http://docs.ruby-lang.org/en/2.0.0/Array.html
+
