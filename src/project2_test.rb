@@ -102,40 +102,20 @@ class Project2Test < Test::Unit::TestCase
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
 
-    def test_file_watch_creation_no_timing_2
-        fileName = "test_file_watch_creation_file11.txt"
-        duration = 1
-
-        assert_raise FileNotFound do
-            FileWatchCreation(
-                duration,
-                fileName) {`echo "addition" > #{fileName}`}
-            `rm -f #{fileName}`
-            `touch #{fileName}`
-            assert_equal($?.exitstatus, 0, "couldn't create file")
-            `rm -f #{fileName}`
-            assert_equal($?.exitstatus, 0, "couldn't remove file")
-            sleep(1.5)
-            # throw exception
-        end
-    end
-
     def test_file_watch_creation_no_timing_3
         fileName1 = "test_file_watch_creation_file111.txt"
         fileName2 = "test_file_watch_creation_file112.txt"
+        `rm -f #{fileName1} #{fileName2}`
         files = fileName1+","+fileName2
-        duration = 1
+        duration = 0
         total = 0
         FileWatchCreation(
             duration,
             files){total = total + fileName1.hash}
 
-        `rm -f #{fileName1} #{fileName2}`
         `touch #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
-
-        sleep(2)
-        assert_equal(fileName1.hash + fileName2.hash, total)
+        assert_equal(fileName1.hash + fileName1.hash, total)
         `rm -f #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -152,6 +132,7 @@ class Project2Test < Test::Unit::TestCase
             duration,
             fileName1
         ){created = true}
+        assert( ! created)
         `touch #{fileName1}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
 
@@ -164,7 +145,6 @@ class Project2Test < Test::Unit::TestCase
             duration,
             fileName1
         ){destroyed = true}
-        assert( ! created)
         assert( ! altered)
         assert( ! destroyed)
 
@@ -196,6 +176,7 @@ class Project2Test < Test::Unit::TestCase
             duration,
             fileName1
         ){created = true}
+        assert( ! created)
         `touch #{fileName1}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
 
@@ -208,7 +189,6 @@ class Project2Test < Test::Unit::TestCase
             duration,
             fileName1
         ){destroyed = true}
-        assert( ! created)
         assert( ! altered)
         assert( ! destroyed)
 
@@ -232,19 +212,18 @@ class Project2Test < Test::Unit::TestCase
     def test_file_watch_creation_no_timing_4
         fileName1 = "test_file_watch_creation_file113.txt"
         fileName2 = "test_file_watch_creation_file114.txt"
+        `rm -f #{fileName1} #{fileName2}`
         files = [fileName1,fileName2]
         duration = 1
         total = 0
         FileWatchCreation(
             duration,
-            files){total = total + fileName1.hash}
+            files){total = total + fileName2.hash}
 
-        `rm -f #{fileName1} #{fileName2}`
         `touch #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
 
-        sleep(2)
-        assert_equal(fileName1.hash + fileName2.hash, total)
+        assert_equal(fileName2.hash + fileName2.hash, total)
         `rm -f #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -289,7 +268,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 0
         assert(!destroyed)
         assert_raise FileNotFound do
-            FileWatchAlter(
+            FileWatchDestroy(
                 duration,
                 fileName) {destroyed = true}
         end
