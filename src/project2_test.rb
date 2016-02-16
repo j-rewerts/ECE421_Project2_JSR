@@ -33,6 +33,7 @@ class Project2Test < Test::Unit::TestCase
         assert(!destoryed)
         `rm -rf #{pipeName}`
         assert_equal($?.exitstatus, 0, "couldn't remove pipe")
+        sleep(0.001)
         assert(destoryed)
     end
 
@@ -49,6 +50,7 @@ class Project2Test < Test::Unit::TestCase
         assert(!destoryed)
         `rm -rf #{dirName}`
         assert_equal($?.exitstatus, 0, "couldn't remove dir")
+        sleep(0.001)
         assert(destoryed)
     end
 
@@ -64,6 +66,7 @@ class Project2Test < Test::Unit::TestCase
         `rm -rf #{pipeName}`
         `mkfifo #{pipeName}`
         assert_equal($?.exitstatus, 0, "couldn't create pipe")
+        sleep(0.001)
         assert(created)
         `rm -rf #{pipeName}`
         assert_equal($?.exitstatus, 0, "couldn't remove pipe")
@@ -80,6 +83,7 @@ class Project2Test < Test::Unit::TestCase
         `rm -rf #{dirName}`
         `mkdir #{dirName}`
         assert_equal($?.exitstatus, 0, "couldn't create dir")
+        sleep(0.001)
         assert(created)
         `rm -rf #{dirName}`
         assert_equal($?.exitstatus, 0, "couldn't remove dir")
@@ -89,14 +93,15 @@ class Project2Test < Test::Unit::TestCase
     def test_file_watch_creation_no_timing
         created = false
         fileName = "test_file_watch_creation_file1.txt"
+        `rm -f #{fileName}`
         duration = 0
         FileWatchCreation(
             duration,
             fileName) {created = true}
         assert(!created)
-        `rm -f #{fileName}`
         `touch #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
+        sleep(0.001)
         assert(created)
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
@@ -115,6 +120,7 @@ class Project2Test < Test::Unit::TestCase
 
         `touch #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
+        sleep(0.001)
         assert_equal(fileName1.hash + fileName1.hash, total)
         `rm -f #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
@@ -123,7 +129,7 @@ class Project2Test < Test::Unit::TestCase
     def test_file_watch_all
         fileName1 = "test_file1.txt"
         `rm -rf #{fileName1}`
-        duration = 1
+        duration = 0
         created = false
         altered = false
         destroyed = false
@@ -167,7 +173,7 @@ class Project2Test < Test::Unit::TestCase
         fileName1 = "test_file2.txt"
         `rm -rf #{fileName1}`
 
-        duration = 1
+        duration = 0
         created = false
         altered = false
         destroyed = false
@@ -214,7 +220,7 @@ class Project2Test < Test::Unit::TestCase
         fileName2 = "test_file_watch_creation_file114.txt"
         `rm -f #{fileName1} #{fileName2}`
         files = [fileName1,fileName2]
-        duration = 1
+        duration = 0
         total = 0
         FileWatchCreation(
             duration,
@@ -223,6 +229,7 @@ class Project2Test < Test::Unit::TestCase
         `touch #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
 
+        sleep(0.001)
         assert_equal(fileName2.hash + fileName2.hash, total)
         `rm -f #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
@@ -240,6 +247,7 @@ class Project2Test < Test::Unit::TestCase
         assert(!altered)
         assert_equal($?.exitstatus, 0, "couldn't create file")
         `echo "some crazy edit" >> #{fileName}`
+        sleep(0.001)
         assert(altered)
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
@@ -258,6 +266,7 @@ class Project2Test < Test::Unit::TestCase
         assert(!destroyed)
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
+        sleep(0.001)
         assert(destroyed)
     end
 
@@ -289,38 +298,30 @@ class Project2Test < Test::Unit::TestCase
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
 
-        while (Time.now - before_destruction) < duration do
-            if destroyed
-                assert(false, "Action activated before time duration")
-            end
+        while (! destroyed)
         end
         after_destruction = Time.now
-        assert(destroyed)
-        assert_in_delta(duration, after_destruction, 0.01)
+        assert_in_delta(duration, after_destruction - before_destruction, 0.1  , "Action not activated in the appointed time.")
 
     end
 
     def test_file_watch_creation_with_timing
         created = false
         fileName = "test_file_watch_creation_file6.txt"
+        `rm -f #{fileName}`
         duration = 2
         FileWatchCreation(
             duration,
             fileName) {created = true}
         assert(!created)
         before_creation = Time.now
-        `rm -f #{fileName}`
         `touch #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
 
-        while (Time.now - before_creation) < duration do
-            if created
-                assert(false, "Action activated before time duration")
-            end
+        while (! created)
         end
         after_creation = Time.now
-        assert(created)
-        assert_in_delta(duration, after_creation, 0.01)
+        assert_in_delta(duration, after_creation - before_creation, 0.1  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -328,26 +329,24 @@ class Project2Test < Test::Unit::TestCase
     def test_file_watch_creation_with_timing_2
         created = false
         fileName = "test_file_watch_creation_file61.txt"
+        `rm -f #{fileName}`
         duration = 2
         FileWatchCreation(
             duration,
             fileName) {created = true}
         assert(!created)
         before_creation = Time.now
-        `rm -f #{fileName}`
         `touch #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
-        `rm -f #{fileName}`
-        assert_equal($?.exitstatus, 0, "couldn't remove file")
 
-        while (Time.now - before_creation) < duration do
-            if created
-                assert(false, "Action activated before time duration")
-            end
+        while (! created)
         end
         after_creation = Time.now
+        assert_in_delta(duration, after_creation - before_creation, 0.1  , "Action not activated in the appointed time.")
+
+        `rm -f #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove file")
         assert(created)
-        assert_in_delta(duration, after_creation, 0.01)
     end
 
     def test_file_watch_altered_with_timing
@@ -364,14 +363,10 @@ class Project2Test < Test::Unit::TestCase
         before_alteration = Time.now
         `echo "some crazy edit" >> #{fileName}`
 
-        while (Time.now - before_alteration) < duration do
-            if altered
-                assert(false, "Action activated before time duration")
-            end
+        while (! altered)
         end
         after_alteration = Time.now
-        assert(altered)
-        assert_in_delta(duration, after_alteration, 0.01)
+        assert_in_delta(duration, after_alteration - before_alteration, 0.1  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -389,14 +384,10 @@ class Project2Test < Test::Unit::TestCase
         assert(!altered)
         before_alteration = Time.now
         `echo "some crazy edit" >> #{fileName}`
-        while (Time.now - before_alteration) < duration do
-            if altered
-                assert(false, "Action activated before time duration")
-            end
+        while (! altered)
         end
         after_alteration = Time.now
-        assert(altered)
-        assert_in_delta(duration, after_alteration, 0.01)
+        assert_in_delta(duration, after_alteration - before_alteration, 0.1  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -416,17 +407,12 @@ class Project2Test < Test::Unit::TestCase
         before_alteration = Time.now
         `echo "some crazy edit" >> #{fileName}`
 
-        sleep(1)
-        `echo "" > #{fileName}` # revert alteration
+        #`echo "" > #{fileName}` # revert alteration
 
-        while (Time.now - before_alteration) < duration do
-            if altered
-                assert(false, "Action activated before time duration")
-            end
+        while (! altered)
         end
         after_alteration = Time.now
-        assert(altered)
-        assert_in_delta(duration, after_alteration, 0.01)
+        assert_in_delta(duration, after_alteration - before_alteration, 0.1  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
