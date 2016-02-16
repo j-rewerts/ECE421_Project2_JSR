@@ -25,7 +25,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 0
         FileWatchCreation(
             duration,
-            fileName) {|f| created = true if f == fileName}
+            fileName) {created = true}
         assert(!created)
         `rm -f #{fileName}`
         `touch #{fileName}`
@@ -42,7 +42,7 @@ class Project2Test < Test::Unit::TestCase
         assert_raise FileNotFound do
             FileWatchCreation(
                 duration,
-                fileName) {|f| `echo "addition" > #{f}` if f == fileName}
+                fileName) {`echo "addition" > #{fileName}`}
             `rm -f #{fileName}`
             `touch #{fileName}`
             assert_equal($?.exitstatus, 0, "couldn't create file")
@@ -61,7 +61,7 @@ class Project2Test < Test::Unit::TestCase
         total = 0
         FileWatchCreation(
             duration,
-            files){|f| total = total + fileName1.hash}
+            files){total = total + fileName1.hash}
 
         `rm -f #{fileName1} #{fileName2}`
         `touch #{fileName1} #{fileName2}`
@@ -83,17 +83,17 @@ class Project2Test < Test::Unit::TestCase
         FileWatchCreation(
             duration,
             fileName1
-        ){|f| created = true if f == fileName1}
+        ){created = true}
 
         FileWatchAlter(
             duration,
             fileName1
-        ){|f| altered = true if f == fileName1}
+        ){altered = true}
 
         FileWatchDestroy(
             duration,
             fileName1
-        ){|f| destroyed = true if f == fileName1}
+        ){destroyed = true}
         assert( ! created)
         assert( ! altered)
         assert( ! destroyed)
@@ -128,17 +128,17 @@ class Project2Test < Test::Unit::TestCase
         FileWatchCreation(
             duration,
             fileName1
-        ){|f| created = true if f == fileName1}
+        ){created = true}
 
         FileWatchAlter(
             duration,
             fileName1
-        ){|f| altered = true if f == fileName1}
+        ){altered = true}
 
         FileWatchDestroy(
             duration,
             fileName1
-        ){|f| destroyed = true if f == fileName1}
+        ){destroyed = true}
         assert( ! created)
         assert( ! altered)
         assert( ! destroyed)
@@ -170,7 +170,7 @@ class Project2Test < Test::Unit::TestCase
         total = 0
         FileWatchCreation(
             duration,
-            files){|f| total = total + fileName1.hash}
+            files){total = total + fileName1.hash}
 
         `rm -f #{fileName1} #{fileName2}`
         `touch #{fileName1} #{fileName2}`
@@ -185,13 +185,13 @@ class Project2Test < Test::Unit::TestCase
     def test_file_watch_altered_no_timing
         altered = false
         fileName = "test_file_watch_alter_file2.txt"
+        `rm -f #{fileName}`
+        `touch #{fileName}`
         duration = 0
         FileWatchAlter(
             duration,
-            fileName) {|f| altered = true if f == fileName}
+            fileName) {altered = true}
         assert(!altered)
-        `rm -f #{fileName}`
-        `touch #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
         `echo "some crazy edit" >> #{fileName}`
         assert(altered)
@@ -208,7 +208,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 0
         FileWatchAlter(
             duration,
-            fileName) {|f| destroyed = true if f == fileName}
+            fileName) {destroyed = true}
         assert(!destroyed)
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
@@ -223,7 +223,7 @@ class Project2Test < Test::Unit::TestCase
         assert(!destroyed)
         FileWatchAlter(
             duration,
-            fileName) {|f| destroyed = true if f == fileName}
+            fileName) {destroyed = true}
         assert(!destroyed)
     end
 
@@ -233,7 +233,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 4
         FileWatchAlter(
             duration,
-            fileName) {|f| destroyed = true if f == fileName}
+            fileName) {destroyed = true}
         assert(!destroyed)
         before_destruction = Time.now
         `rm -f #{fileName}`
@@ -259,7 +259,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 2
         FileWatchCreation(
             duration,
-            fileName) {|f| created = true if f == fileName}
+            fileName) {created = true}
         assert(!created)
         before_creation = Time.now
         `rm -f #{fileName}`
@@ -284,7 +284,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 2
         FileWatchCreation(
             duration,
-            fileName) {|f| created = true if f == fileName}
+            fileName) {created = true}
         assert(!created)
         before_creation = Time.now
         `rm -f #{fileName}`
@@ -309,7 +309,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 4
         FileWatchAlter(
             duration,
-            fileName) {|f| altered = true if f == fileName}
+            fileName) {altered = true}
         assert(!altered)
         before_alteration = Time.now
         `rm -f #{fileName}`
@@ -338,7 +338,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 3
         FileWatchAlter(
             duration,
-            fileName) {|f| altered = true if f == fileName}
+            fileName) {altered = true}
         assert(!altered)
         before_alteration = Time.now
         `echo "some crazy edit" >> #{fileName}`
@@ -364,7 +364,7 @@ class Project2Test < Test::Unit::TestCase
         duration = 3
         FileWatchAlter(
             duration,
-            fileName) {|f| altered = true if f == fileName}
+            fileName) {altered = true}
         assert(!altered)
         before_alteration = Time.now
         `echo "some crazy edit" >> #{fileName}`
