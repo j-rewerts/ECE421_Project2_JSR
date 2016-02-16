@@ -17,3 +17,11 @@ gcc: http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ub
 ln : http://stackoverflow.com/questions/16710047/usr-bin-ld-cannot-find-lnameofthelibrary
 Rb-inotify: https://github.com/nex3/rb-inotify
 
+Pipes : http://www.linuxjournal.com/article/2156?page=0,1
+file search : http://stackoverflow.com/questions/2370702/one-liner-to-recursively-list-directories-in-ruby
+file watcher : https://github.com/thomasfl/filewatcher
+ruby thread : http://ruby-doc.org/core-1.9.3/Thread.html#method-i-priority-3D
+ruby class fn : http://stackoverflow.com/questions/15769739/determining-type-of-an-object-in-ruby
+ruby vars : http://www.tutorialspoint.com/ruby/ruby_variables.htm
+ruby each : http://ruby-doc.org/core-2.2.0/Array.html#method-i-each
+
