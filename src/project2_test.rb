@@ -142,6 +142,7 @@ class Project2Test < Test::Unit::TestCase
 
     def test_file_watch_all
         fileName1 = "test_file1.txt"
+        `rm -rf #{fileName1}`
         duration = 1
         created = false
         altered = false
@@ -151,6 +152,8 @@ class Project2Test < Test::Unit::TestCase
             duration,
             fileName1
         ){created = true}
+        `touch #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
 
         FileWatchAlter(
             duration,
@@ -165,9 +168,6 @@ class Project2Test < Test::Unit::TestCase
         assert( ! altered)
         assert( ! destroyed)
 
-        `rm -rf #{fileName1}`
-        `touch #{fileName1}`
-        assert_equal($?.exitstatus, 0, "couldn't create file")
         sleep(1.1)
         assert(created)
 
@@ -196,6 +196,8 @@ class Project2Test < Test::Unit::TestCase
             duration,
             fileName1
         ){created = true}
+        `touch #{fileName1}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
 
         FileWatchAlter(
             duration,
@@ -210,8 +212,6 @@ class Project2Test < Test::Unit::TestCase
         assert( ! altered)
         assert( ! destroyed)
 
-        `touch #{fileName1}`
-        assert_equal($?.exitstatus, 0, "couldn't create file")
         sleep(1.1)
         assert(created)
 
@@ -288,24 +288,25 @@ class Project2Test < Test::Unit::TestCase
         `rm -f #{fileName}` # just in case
         duration = 0
         assert(!destroyed)
-        FileWatchAlter(
-            duration,
-            fileName) {destroyed = true}
-        assert(!destroyed)
+        assert_raise FileNotFound do
+            FileWatchAlter(
+                duration,
+                fileName) {destroyed = true}
+        end
     end
 
     def test_file_watch_destroyed_with_timing
         destroyed = false
         fileName = "test_file_watch_destroy_file5.txt"
+        `rm -f #{fileName}`
+        `touch #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
         duration = 4
         FileWatchAlter(
             duration,
             fileName) {destroyed = true}
         assert(!destroyed)
         before_destruction = Time.now
-        `rm -f #{fileName}`
-        `touch #{fileName}`
-        assert_equal($?.exitstatus, 0, "couldn't create file")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
 
@@ -373,15 +374,15 @@ class Project2Test < Test::Unit::TestCase
     def test_file_watch_altered_with_timing
         altered = false
         fileName = "test_file_watch_alter_file7.txt"
+        `rm -f #{fileName}`
+        `touch #{fileName}`
+        assert_equal($?.exitstatus, 0, "couldn't create file")
         duration = 4
         FileWatchAlter(
             duration,
             fileName) {altered = true}
         assert(!altered)
         before_alteration = Time.now
-        `rm -f #{fileName}`
-        `touch #{fileName}`
-        assert_equal($?.exitstatus, 0, "couldn't create file")
         `echo "some crazy edit" >> #{fileName}`
 
         while (Time.now - before_alteration) < duration do
