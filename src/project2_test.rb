@@ -19,6 +19,73 @@ class Project2Test < Test::Unit::TestCase
 
     end
 
+
+    def test_pipe_watch_destroy_no_timing
+        destoryed = false
+        pipeName = "test_pipe_watch_destruction"
+        `rm -rf #{pipeName}`
+        `mkfifo #{pipeName}`
+        assert_equal($?.exitstatus, 0, "couldn't create pipe")
+        duration = 0
+        FileWatchDestroy(
+            duration,
+            pipeName) {destoryed = true}
+        assert(!destoryed)
+        `rm -rf #{pipeName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove pipe")
+        assert(destoryed)
+    end
+
+    def test_dir_watch_destroy_no_timing
+        destoryed = false
+        dirName = "test_dir_watch_destruction"
+        `rm -rf #{dirName}`
+        `mkdir #{dirName}`
+        assert_equal($?.exitstatus, 0, "couldn't create dir")
+        duration = 0
+        FileWatchDestroy(
+            duration,
+            dirName) {destoryed = true}
+        assert(!destoryed)
+        `rm -rf #{dirName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove dir")
+        assert(destoryed)
+    end
+
+
+    def test_pipe_watch_creation_no_timing
+        created = false
+        pipeName = "test_pipe_watch_creation"
+        duration = 0
+        FileWatchCreation(
+            duration,
+            pipeName) {created = true}
+        assert(!created)
+        `rm -rf #{pipeName}`
+        `mkfifo #{pipeName}`
+        assert_equal($?.exitstatus, 0, "couldn't create pipe")
+        assert(created)
+        `rm -rf #{pipeName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove pipe")
+    end
+
+    def test_dir_watch_creation_no_timing
+        created = false
+        dirName = "test_dir_watch_creation"
+        duration = 0
+        FileWatchCreation(
+            duration,
+            dirName) {created = true}
+        assert(!created)
+        `rm -rf #{dirName}`
+        `mkdir #{dirName}`
+        assert_equal($?.exitstatus, 0, "couldn't create dir")
+        assert(created)
+        `rm -rf #{dirName}`
+        assert_equal($?.exitstatus, 0, "couldn't remove dir")
+    end
+
+
     def test_file_watch_creation_no_timing
         created = false
         fileName = "test_file_watch_creation_file1.txt"
