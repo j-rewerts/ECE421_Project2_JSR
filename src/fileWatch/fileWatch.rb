@@ -6,6 +6,8 @@ module FileWatch
     end
     class FileNotDestroyed < StandardError
     end
+    class ActionNotPerformed < StandardError
+    end
 
     def is_a_file?(name)
         false unless name.include? "."
@@ -77,7 +79,7 @@ module FileWatch
             }
             alter_thread = Thread.new do
                 watcher.run
-                raise StandardError if postcondition == false
+                raise ActionNotPerformed if postcondition == false
             end
             alter_thread.priority = -1
 
@@ -116,7 +118,7 @@ module FileWatch
 
             destory_thread = Thread.new do
                 watcher.run
-                raise StandardError if postcondition == false
+                raise ActionNotPerformed if postcondition == false
                 files.each {|file|
                     raise FileNotDestroyed, "File still exists." unless !(File.exist?(file))
                 }
