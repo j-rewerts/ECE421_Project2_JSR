@@ -27,8 +27,13 @@ module FileWatch
         return files
     end
 
+    def check_duration(duration)
+        raise TypeError, "duration must be a Numeric value greater than 0." unless
+            ((duration.is_a? Numeric) && (duration > 0))
+    end
+
     def FileWatchCreation(duration, files, &main_action)
-        raise TypeError, "duration must be a Numeric value" unless duration.is_a? Numeric
+        check_duration(duration)
         files = format_and_check_files(files)
 
         postcondition = false
@@ -49,7 +54,7 @@ module FileWatch
     end
 
     def FileWatchAlter(duration, files, &main_action)
-        raise TypeError, "duration must be a Numeric value" unless duration.is_a? Numeric
+        check_duration(duration)
         files = format_and_check_files(files)
 
         begin
@@ -78,7 +83,7 @@ module FileWatch
     end
 
     def FileWatchDestroy(duration, files, &main_action)
-        raise TypeError, "duration must be a Numeric value" unless duration.is_a? Numeric
+        check_duration(duration)
         files = format_and_check_files(files)
 
         begin

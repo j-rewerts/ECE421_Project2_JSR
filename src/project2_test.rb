@@ -124,6 +124,46 @@ class Project2Test < Test::Unit::TestCase
 
     end
 
+    def test_file_watch_bad_duration
+        duration = -12
+        fileName = "asd"
+        assert_raise TypeError do
+            FileWatchCreation(
+                duration,
+                fileName) { puts "test"}
+        end
+        assert_raise TypeError do
+            FileWatchAlter(
+                duration,
+                fileName) {puts "test"}
+        end
+        assert_raise TypeError do
+            FileWatchDestroy(
+                duration,
+                fileName) {puts "test"}
+        end
+    end
+
+    def test_file_watch_bad_fileName
+        duration = 1
+        fileName = 23
+        assert_raise TypeError do
+            FileWatchCreation(
+                duration,
+                fileName) {destroyed = true}
+        end
+        assert_raise TypeError do
+            FileWatchAlter(
+                duration,
+                fileName) {destroyed = true}
+        end
+        assert_raise TypeError do
+            FileWatchDestroy(
+                duration,
+                fileName) {destroyed = true}
+        end
+    end
+
     def test_file_in_dir_delete
         destroyed = false
         dirName = "test_dir31"
