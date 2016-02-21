@@ -164,6 +164,27 @@ class Project2Test < Test::Unit::TestCase
         end
     end
 
+
+    def test_file_watch_bad_fileName2
+        duration = 1
+        fileName = [23]
+        assert_raise TypeError do
+            FileWatchCreation(
+                duration,
+                fileName) {destroyed = true}
+        end
+        assert_raise TypeError do
+            FileWatchAlter(
+                duration,
+                fileName) {destroyed = true}
+        end
+        assert_raise TypeError do
+            FileWatchDestroy(
+                duration,
+                fileName) {destroyed = true}
+        end
+    end
+
     def test_file_in_dir_delete
         destroyed = false
         dirName = "test_dir31"
@@ -315,7 +336,7 @@ class Project2Test < Test::Unit::TestCase
         `rm -f #{fileName}`
         `touch #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't create file")
-        duration = 4
+        duration = 1.9343
         FileWatchAlter(
             duration,
             fileName) {destroyed = true}
@@ -442,7 +463,6 @@ class Project2Test < Test::Unit::TestCase
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
-
 
 end
 
