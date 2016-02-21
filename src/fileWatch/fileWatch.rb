@@ -28,8 +28,8 @@ module FileWatch
     end
 
     def check_duration(duration)
-        raise TypeError, "duration must be a Numeric value greater than 0." unless
-            ((duration.is_a? Numeric) && (duration > 0))
+        raise TypeError, "duration must be a Numeric value greater than or equal to 0." unless
+            ((duration.is_a? Numeric) && (duration >= 0))
     end
 
     def FileWatchCreation(duration, files, &main_action)
