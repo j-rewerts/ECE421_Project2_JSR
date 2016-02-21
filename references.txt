@@ -31,3 +31,12 @@ ruby excep handling : http://phrogz.net/programmingruby/tut_exceptions.html
 ruby blocks/procs : http://www.reactive.io/tips/2008/12/21/understanding-ruby-blocks-procs-and-lambdas/
 ruby array include :  http://docs.ruby-lang.org/en/2.0.0/Array.html
 
+RB - Inotify
+https://github.com/nex3/rb-inotify/blob/2e473580d1575cba66645bce3e5371bd2e259a3c/lib/rb-inotify/native/flags.rb
+
+File
+http://stackoverflow.com/questions/10580728/is-it-possible-to-read-a-files-modification-date-with-ruby
+
+inotify
+http://man7.org/linux/man-pages/man7/inotify.7.html#SEE_ALSO
+
