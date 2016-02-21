@@ -39,22 +39,30 @@ module FileWatch
     end
 
     def FileWatchAlter(duration, files, &main_action)
-        postcondition = false
-        action = Proc.new {
-            sleep(duration)
-            main_action.call
-            postcondition = true
-        }
+        case files
+        when Array
+            files.each {|file| raise TypeError unless file.is_a? String}
+        when String
+            #files.include? "," ? files = files.split(",") : files = [files]
+            if (files.include? ",")
+                files = files.split(",")
+            else
+                files = [files]
+            end
+        else
+            raise TypeError
+        end
         begin
             watcher = INotify::Notifier.new
-            case files
-            when Array
-                files.each {
-                    |file| watcher.watch(file, :modify, :create, :attrb, :delete, :move_self, &action)
-                }
-            when String
-                watcher.watch(files, :modify, :create, :attrib, :delete, :move_self, &action)
-            end
+            postcondition = false
+            action = Proc.new {
+                sleep(duration)
+                main_action.call
+                postcondition = true
+            }
+            files.each {
+                |file| watcher.watch(file, :modify, :create, :attrib, :delete, :move_self, &action)
+            }
             alter_thread = Thread.new do
                 watcher.run
                 raise StandardError if postcondition == false
@@ -70,23 +78,38 @@ module FileWatch
     end
 
     def FileWatchDestroy(duration, files, &main_action)
-        postcondition = false
-        action = Proc.new {
-            sleep(duration)
-            main_action.call
-            postcondition = true
-        }
+        case files
+        when Array
+            files.each {|file| raise TypeError unless file.is_a? String}
+        when String
+            #files.include? "," ? files = files.split(",") : files = [files]
+            if (files.include? ",")
+                files = files.split(",")
+            else
+                files = [files]
+            end
+        else
+            raise TypeError
+        end
 
         begin
             watcher = INotify::Notifier.new
-            case files
-            when Array
-                files.each {
-                    |file| watcher.watch(file, :delete_self, &action)
-                }
-            when String
-                watcher.watch(files, :delete_self, &action)
-            end
+            postcondition = false
+            action = Proc.new {
+                sleep(duration)
+                main_action.call
+                postcondition = true
+            }
+            files.each {
+                |file| watcher.watch(file, :delete_self, &action)
+            }
+            postcondition = false
+            action = Proc.new {
+                sleep(duration)
+                main_action.call
+                postcondition = true
+            }
+
             destory_thread = Thread.new do
                 watcher.run
                 raise StandardError if postcondition == false
@@ -100,5 +123,4 @@ module FileWatch
             end
         end
     end
-
 end
