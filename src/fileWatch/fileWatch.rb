@@ -87,6 +87,8 @@ module FileWatch
             case e
             when Errno::ENOENT
                 raise FileNotFound
+            else
+                raise e
             end
         end
     end
@@ -129,6 +131,8 @@ module FileWatch
             case e
             when Errno::ENOENT
                 raise FileNotFound
+            else
+                raise e
             end
         end
     end
