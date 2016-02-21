@@ -7,8 +7,7 @@ module FileWatch
         false unless name.include? "."
         true
     end
-    def FileWatchCreation(duration, files, &action)
-        files_on_system = []
+    def FileWatchCreation(duration, files, &main_action)
         case files
         when Array
             files.each {|file| raise TypeError unless file.is_a? String}
@@ -22,48 +21,45 @@ module FileWatch
         else
             raise TypeError
         end
+        postcondition = false
+        action = Proc.new {
+            sleep(duration)
+            main_action.call
+            postcondition = true
+        }
 
-        create_thread = Thread.new do
-            while ( files.any? )
-                # http://stackoverflow.com/questions/3260686/how-can-i-use-arraydelete-while-iterating-over-the-array
-                files.delete_if do |file|
-                    if is_a_file?(file)
-                        files_on_system = Dir.glob("**/*")
-                    else
-                        files_on_system = Dir.glob("**/*/")
-                    end
-                    if files_on_system.include? file
-                        #act_thread = Thread.new do
-                        time_left = duration - (Time.now - File.ctime(file))
-                        sleep(time_left) if time_left > 0
-                        action.call
-                        #end
-                        true
-                    end
+        files.each { |file|
+            create_thread = Thread.new do
+                while ( postcondition == false)
+                    action.call if File.exist?(file)
                 end
             end
-        end
-        create_thread.priority = -1;
+            create_thread.priority = -1
+        }
     end
 
     def FileWatchAlter(duration, files, &main_action)
+        postcondition = false
         action = Proc.new {
             sleep(duration)
             main_action.call
+            postcondition = true
         }
         begin
             watcher = INotify::Notifier.new
             case files
             when Array
                 files.each {
-                    |file| watcher.watch(file, :modify, &action)
+                    |file| watcher.watch(file, :modify, :create, :attrb, :delete, :move_self, &action)
                 }
             when String
-                watcher.watch(files, :modify, &action)
+                watcher.watch(files, :modify, :create, :attrib, :delete, :move_self, &action)
             end
             alter_thread = Thread.new do
                 watcher.run
+                raise StandardError if postcondition == false
             end
+            alter_thread.priority = -1
 
         rescue Exception => e
             case e
@@ -71,13 +67,14 @@ module FileWatch
                 raise FileNotFound
             end
         end
-        #sleep(1)
     end
 
     def FileWatchDestroy(duration, files, &main_action)
+        postcondition = false
         action = Proc.new {
             sleep(duration)
             main_action.call
+            postcondition = true
         }
 
         begin
@@ -85,14 +82,16 @@ module FileWatch
             case files
             when Array
                 files.each {
-                    |file| watcher.watch(file, :delete, &action)
+                    |file| watcher.watch(file, :delete_self, &action)
                 }
             when String
-                watcher.watch(files, :delete, &action)
+                watcher.watch(files, :delete_self, &action)
             end
             destory_thread = Thread.new do
                 watcher.run
+                raise StandardError if postcondition == false
             end
+            destory_thread.priority = -1
 
         rescue Exception => e
             case e
@@ -100,7 +99,6 @@ module FileWatch
                 raise FileNotFound
             end
         end
-        #sleep(1)
     end
 
 end
