@@ -4,6 +4,8 @@ module FileWatch
 
     class FileNotFound < StandardError
     end
+    class FileNotDestroyed < StandardError
+    end
 
     def is_a_file?(name)
         false unless name.include? "."
@@ -28,6 +30,7 @@ module FileWatch
     end
 
     def check_duration(duration)
+	#http://rubylearning.com/satishtalim/ruby_exceptions.html
         raise TypeError, "duration must be a Numeric value greater than or equal to 0." unless
             ((duration.is_a? Numeric) && (duration >= 0))
     end
@@ -46,6 +49,7 @@ module FileWatch
         files.each { |file|
             create_thread = Thread.new do
                 while ( postcondition == false)
+                    # http://www.gethourglass.com/blog/ruby-check-if-file-exists.html
                     action.call if File.exist?(file)
                 end
             end
@@ -56,6 +60,9 @@ module FileWatch
     def FileWatchAlter(duration, files, &main_action)
         check_duration(duration)
         files = format_and_check_files(files)
+        files.each {|file|
+            raise FileNotFound, "File must exist." unless File.exist?(file)
+        }
 
         begin
             watcher = INotify::Notifier.new
@@ -85,6 +92,9 @@ module FileWatch
     def FileWatchDestroy(duration, files, &main_action)
         check_duration(duration)
         files = format_and_check_files(files)
+        files.each {|file|
+            raise FileNotFound, "File must exist." unless File.exist?(file)
+        }
 
         begin
             watcher = INotify::Notifier.new
@@ -107,6 +117,9 @@ module FileWatch
             destory_thread = Thread.new do
                 watcher.run
                 raise StandardError if postcondition == false
+                files.each {|file|
+                    raise FileNotDestroyed, "File still exists." unless !(File.exist?(file))
+                }
             end
             destory_thread.priority = -1
 
