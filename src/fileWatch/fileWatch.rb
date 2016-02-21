@@ -1,13 +1,16 @@
 require 'rb-inotify'
 module FileWatch
     # http://blog.honeybadger.io/ruby-custom-exceptions/
+
     class FileNotFound < StandardError
     end
+
     def is_a_file?(name)
         false unless name.include? "."
         true
     end
-    def FileWatchCreation(duration, files, &main_action)
+
+    def format_and_check_files(files)
         case files
         when Array
             files.each {|file| raise TypeError unless file.is_a? String}
@@ -21,6 +24,13 @@ module FileWatch
         else
             raise TypeError
         end
+        return files
+    end
+
+    def FileWatchCreation(duration, files, &main_action)
+        raise TypeError, "duration must be a Numeric value" unless duration.is_a? Numeric
+        files = format_and_check_files(files)
+
         postcondition = false
         action = Proc.new {
             sleep(duration)
@@ -39,19 +49,9 @@ module FileWatch
     end
 
     def FileWatchAlter(duration, files, &main_action)
-        case files
-        when Array
-            files.each {|file| raise TypeError unless file.is_a? String}
-        when String
-            #files.include? "," ? files = files.split(",") : files = [files]
-            if (files.include? ",")
-                files = files.split(",")
-            else
-                files = [files]
-            end
-        else
-            raise TypeError
-        end
+        raise TypeError, "duration must be a Numeric value" unless duration.is_a? Numeric
+        files = format_and_check_files(files)
+
         begin
             watcher = INotify::Notifier.new
             postcondition = false
@@ -78,19 +78,8 @@ module FileWatch
     end
 
     def FileWatchDestroy(duration, files, &main_action)
-        case files
-        when Array
-            files.each {|file| raise TypeError unless file.is_a? String}
-        when String
-            #files.include? "," ? files = files.split(",") : files = [files]
-            if (files.include? ",")
-                files = files.split(",")
-            else
-                files = [files]
-            end
-        else
-            raise TypeError
-        end
+        raise TypeError, "duration must be a Numeric value" unless duration.is_a? Numeric
+        files = format_and_check_files(files)
 
         begin
             watcher = INotify::Notifier.new
