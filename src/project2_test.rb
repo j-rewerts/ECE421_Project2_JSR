@@ -4,6 +4,11 @@ require_relative "fileWatch/fileWatch.rb"
 include FileWatch
 class Project2Test < Test::Unit::TestCase
 
+    def time_leeway
+        return 0.5
+    end
+
+
     def test_message_bad_input
         message = "message"
 
@@ -20,6 +25,7 @@ class Project2Test < Test::Unit::TestCase
     end
 
 
+
     def test_pipe_watch_destroy_no_timing
         destroyed = false
         pipeName = "test_pipe_watch_destruction"
@@ -28,7 +34,6 @@ class Project2Test < Test::Unit::TestCase
         assert_equal($?.exitstatus, 0, "couldn't create pipe")
         duration = 0
         FileWatchDestroy(
-            duration,
             pipeName) {destroyed = true}
         assert(!destroyed)
         before_destruction = Time.now
@@ -38,7 +43,7 @@ class Project2Test < Test::Unit::TestCase
         end
         after_destruction = Time.now
         assert(destroyed)
-        assert_in_delta(duration, after_destruction - before_destruction, 0.5, "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_destruction - before_destruction, time_leeway, "Action not activated in the appointed time.")
     end
 
     def test_dir_watch_destroy_no_timing
@@ -49,7 +54,6 @@ class Project2Test < Test::Unit::TestCase
         assert_equal($?.exitstatus, 0, "couldn't create dir")
         duration = 0
         FileWatchDestroy(
-            duration,
             dirName) {destroyed = true}
         assert(!destroyed)
         before_destruction = Time.now
@@ -59,7 +63,7 @@ class Project2Test < Test::Unit::TestCase
         end
         after_destruction = Time.now
         assert(destroyed)
-        assert_in_delta(duration, after_destruction - before_destruction, 0.5, "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_destruction - before_destruction, time_leeway, "Action not activated in the appointed time.")
 
         `rm -rf #{dirName}`
         assert_equal($?.exitstatus, 0, "couldn't remove pipe")
@@ -67,7 +71,7 @@ class Project2Test < Test::Unit::TestCase
         end
         after_destruction = Time.now
         assert(destroyed)
-        assert_in_delta(duration, after_destruction - before_destruction, 0.5, "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_destruction - before_destruction, time_leeway, "Action not activated in the appointed time.")
 
     end
 
@@ -80,7 +84,6 @@ class Project2Test < Test::Unit::TestCase
         destroyed = false
 
         FileWatchCreation(
-            duration,
             dirName
         ){created = true}
         assert( ! created)
@@ -90,15 +93,13 @@ class Project2Test < Test::Unit::TestCase
         while (! created)
         end
         after_creation = Time.now
-        assert_in_delta(duration, after_creation - before_creation, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_creation - before_creation, time_leeway  , "Action not activated in the appointed time.")
 
         FileWatchAlter(
-            duration,
             dirName
         ){altered = true}
 
         FileWatchDestroy(
-            duration,
             dirName
         ){destroyed = true}
         assert( ! altered)
@@ -110,7 +111,7 @@ class Project2Test < Test::Unit::TestCase
         while (! altered)
         end
         after_alteration = Time.now
-        assert_in_delta(duration, after_alteration - before_alteration, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
 
 
         before_destruction = Time.now
@@ -120,28 +121,49 @@ class Project2Test < Test::Unit::TestCase
         end
         after_destruction = Time.now
         assert(destroyed)
-        assert_in_delta(duration, after_destruction - before_destruction, 0.5, "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_destruction - before_destruction, time_leeway, "Action not activated in the appointed time.")
 
     end
 
     def test_file_watch_bad_duration
-        duration = -12
+        duration = -1
         fileName = "asd"
         assert_raise TypeError do
             FileWatchCreation(
                 duration,
                 fileName) { puts "test"}
         end
+        duration = -9999999
         assert_raise TypeError do
             FileWatchAlter(
                 duration,
                 fileName) {puts "test"}
         end
+        duration = -999999999999
         assert_raise TypeError do
             FileWatchDestroy(
                 duration,
                 fileName) {puts "test"}
         end
+    end
+
+    def test_file_watch_no_action
+        assert_raise ArgumentError do
+            FileWatchCreation(
+                1,
+                "as")
+        end
+        assert_raise ArgumentError do
+            FileWatchAlter(
+                1,
+                "as")
+        end
+        assert_raise ArgumentError do
+            FileWatchDestroy(
+                1,
+                "as")
+        end
+
     end
 
     def test_file_watch_bad_fileName
@@ -152,11 +174,13 @@ class Project2Test < Test::Unit::TestCase
                 duration,
                 fileName) {destroyed = true}
         end
+        fileName = 21023.123941
         assert_raise TypeError do
             FileWatchAlter(
                 duration,
                 fileName) {destroyed = true}
         end
+        fileName = Hash.new
         assert_raise TypeError do
             FileWatchDestroy(
                 duration,
@@ -173,17 +197,40 @@ class Project2Test < Test::Unit::TestCase
                 duration,
                 fileName) {destroyed = true}
         end
+        fileName = [[Hash.new],"file.txt"]
         assert_raise TypeError do
             FileWatchAlter(
                 duration,
                 fileName) {destroyed = true}
         end
+        fileName = [["asd"]]
         assert_raise TypeError do
             FileWatchDestroy(
                 duration,
                 fileName) {destroyed = true}
         end
     end
+
+    def test_file_watch_bad_fileName3
+        duration = 1
+        fileName = []
+        assert_raise ArgumentError do
+            FileWatchCreation(
+                duration,
+                fileName) {destroyed = true}
+        end
+        assert_raise ArgumentError do
+            FileWatchAlter(
+                duration,
+                fileName) {destroyed = true}
+        end
+        assert_raise ArgumentError do
+            FileWatchDestroy(
+                duration,
+                fileName) {destroyed = true}
+        end
+    end
+
 
     def test_file_in_dir_delete
         destroyed = false
@@ -196,7 +243,6 @@ class Project2Test < Test::Unit::TestCase
         assert_equal($?.exitstatus, 0, "couldn't create file")
         duration = 0
         FileWatchAlter(
-            duration,
             fileName) {destroyed = true}
         assert(!destroyed)
         before_destruction = Time.now
@@ -206,7 +252,7 @@ class Project2Test < Test::Unit::TestCase
         end
         after_destruction = Time.now
         assert(destroyed)
-        assert_in_delta(duration, after_destruction - before_destruction, 0.5, "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_destruction - before_destruction, time_leeway, "Action not activated in the appointed time.")
         `rm -rf #{dirName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -218,7 +264,6 @@ class Project2Test < Test::Unit::TestCase
         `touch #{fileName}`
         duration = 0
         FileWatchAlter(
-            duration,
             fileName) {altered = true}
         assert(!altered)
         before_alteration = Time.now
@@ -228,7 +273,7 @@ class Project2Test < Test::Unit::TestCase
         while (! altered)
         end
         after_alteration = Time.now
-        assert_in_delta(duration, after_alteration - before_alteration, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -241,7 +286,6 @@ class Project2Test < Test::Unit::TestCase
         `touch #{fileName}`
         duration = 0
         FileWatchAlter(
-            duration,
             fileName) {altered = true}
         assert(!altered)
         before_alteration = Time.now
@@ -250,7 +294,7 @@ class Project2Test < Test::Unit::TestCase
         while (! altered)
         end
         after_alteration = Time.now
-        assert_in_delta(duration, after_alteration - before_alteration, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
     end
 
@@ -262,7 +306,6 @@ class Project2Test < Test::Unit::TestCase
         duration = 0
         total = 0
         FileWatchCreation(
-            duration,
             files){total = total + fileName2.hash}
         before_creation = Time.now
         `touch #{fileName1} #{fileName2}`
@@ -271,7 +314,7 @@ class Project2Test < Test::Unit::TestCase
         while (total != fileName2.hash + fileName2.hash)
         end
         after_creation = Time.now
-        assert_in_delta(duration, after_creation - before_creation, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_creation - before_creation, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName1} #{fileName2}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -283,7 +326,6 @@ class Project2Test < Test::Unit::TestCase
         `touch #{fileName}`
         duration = 0
         FileWatchAlter(
-            duration,
             fileName) {altered = true}
         assert(!altered)
         before_alteration = Time.now
@@ -292,7 +334,7 @@ class Project2Test < Test::Unit::TestCase
         while (! altered)
         end
         after_alteration = Time.now
-        assert_in_delta(duration, after_alteration - before_alteration, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
     end
 
@@ -304,7 +346,6 @@ class Project2Test < Test::Unit::TestCase
         assert_equal($?.exitstatus, 0, "couldn't create file")
         duration = 0
         FileWatchDestroy(
-            duration,
             fileName) {destroyed = true}
         assert(!destroyed)
         before_destruction = Time.now
@@ -314,7 +355,7 @@ class Project2Test < Test::Unit::TestCase
         end
         after_destruction = Time.now
         assert(destroyed)
-        assert_in_delta(duration, after_destruction - before_destruction, 0.5, "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_destruction - before_destruction, time_leeway, "Action not activated in the appointed time.")
     end
 
     def test_file_watch_destroyed_no_timing_file_not_created
@@ -325,7 +366,6 @@ class Project2Test < Test::Unit::TestCase
         assert(!destroyed)
         assert_raise FileNotFound do
             FileWatchDestroy(
-                duration,
                 fileName) {destroyed = true}
         end
     end
@@ -348,7 +388,7 @@ class Project2Test < Test::Unit::TestCase
         while (! destroyed)
         end
         after_destruction = Time.now
-        assert_in_delta(duration, after_destruction - before_destruction, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_destruction - before_destruction, time_leeway  , "Action not activated in the appointed time.")
 
     end
 
@@ -368,7 +408,7 @@ class Project2Test < Test::Unit::TestCase
         while (! created)
         end
         after_creation = Time.now
-        assert_in_delta(duration, after_creation - before_creation, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_creation - before_creation, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -389,7 +429,7 @@ class Project2Test < Test::Unit::TestCase
         while (! created)
         end
         after_creation = Time.now
-        assert_in_delta(duration, after_creation - before_creation, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_creation - before_creation, time_leeway  , "Action not activated in the appointed time.")
 
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
@@ -413,7 +453,7 @@ class Project2Test < Test::Unit::TestCase
         while (! altered)
         end
         after_alteration = Time.now
-        assert_in_delta(duration, after_alteration - before_alteration, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -434,7 +474,7 @@ class Project2Test < Test::Unit::TestCase
         while (! altered)
         end
         after_alteration = Time.now
-        assert_in_delta(duration, after_alteration - before_alteration, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
@@ -459,7 +499,7 @@ class Project2Test < Test::Unit::TestCase
         while (! altered)
         end
         after_alteration = Time.now
-        assert_in_delta(duration, after_alteration - before_alteration, 0.5  , "Action not activated in the appointed time.")
+        assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
     end
