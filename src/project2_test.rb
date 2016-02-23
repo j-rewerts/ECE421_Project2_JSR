@@ -1,7 +1,7 @@
 require "test/unit"
 require "stringio"
-#require_relative "fileWatch/fileWatch.rb"
-#include FileWatch
+require_relative "fileWatch/fileWatch.rb"
+include FileWatch
 class Project2Test < Test::Unit::TestCase
 
     def time_leeway
