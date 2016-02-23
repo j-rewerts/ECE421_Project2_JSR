@@ -9,6 +9,9 @@ module FileWatch
     class ActionNotPerformed < StandardError
     end
 
+    @@files_arg_requirements = "Files must be present as a comma-separated string ('file1.txt,dir2,...') or a list of strings (['dir1','file2.txt',...])."
+    @@duration_arg_requirements = "When provided, Duration is in seconds and must be a Numeric value greater than or equal to 0."
+
     def format_and_check_files(files)
         case files
         when Array
@@ -22,31 +25,32 @@ module FileWatch
                 files = [files]
             end
         else
-            raise TypeError, "Files must be present as a comma-separated string or a list of strings."
+            raise TypeError, @@files_arg_requirements
         end
         return files
     end
 
     def check_duration(duration)
 	    #http://rubylearning.com/satishtalim/ruby_exceptions.html
-        raise TypeError, "Duration must be a Numeric value greater than or equal to 0." unless
+        raise TypeError, @@duration_arg_requirements unless
             ((duration.is_a? Numeric) && (duration >= 0))
         return duration
     end
 
     def preconditions_check(args, &main_action)
-        duration = args[0]
-        files = args[1]
+        raise ArgumentError, "Incorrent number of arguments. \n"\
+                             "Expected parameters are: \n" \
+                             "(1.) Duration: #{@@duration_arg_requirements} \n"\
+                             "(2.) Files: #{@@files_arg_requirements} \n"\
+                             "and action." unless (args.size == 1 or args.size == 2)
         raise ArgumentError, "Action required." unless block_given?
-        case duration
-        when Numeric
-            files = format_and_check_files(files)
-            duration = check_duration(duration)
-        when Array, String
-            files = format_and_check_files(duration)
+
+        if args.size == 1
             duration = 0
+            files = format_and_check_files(args[0])
         else
-            raise ArgumentError, "Action"
+            duration = check_duration(args[0])
+            files = format_and_check_files(args[1])
         end
         return [duration,files]
     end
