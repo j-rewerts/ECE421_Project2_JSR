@@ -25,7 +25,6 @@ class Project2Test < Test::Unit::TestCase
     end
 
 
-
     def test_pipe_watch_destroy_no_timing
         destroyed = false
         pipeName = "test_pipe_watch_destruction"
@@ -123,6 +122,30 @@ class Project2Test < Test::Unit::TestCase
         assert(destroyed)
         assert_in_delta(duration, after_destruction - before_destruction, time_leeway, "Action not activated in the appointed time.")
 
+    end
+
+    def test_file_watch_too_few_args
+        assert_raise ArgumentError do
+            FileWatchCreation()
+        end
+        assert_raise ArgumentError do
+            FileWatchAlter()
+        end
+        assert_raise ArgumentError do
+            FileWatchDestroy()
+        end
+    end
+
+    def test_file_watch_too_many_args
+        assert_raise ArgumentError do
+            FileWatchCreation(1,2,3,4) {}
+        end
+        assert_raise ArgumentError do
+            FileWatchAlter("asd",123.123,Hash.new, []) {}
+        end
+        assert_raise ArgumentError do
+            FileWatchDestroy("asd",999999999999)
+        end
     end
 
     def test_file_watch_bad_duration
