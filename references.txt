@@ -40,3 +40,12 @@ http://stackoverflow.com/questions/10580728/is-it-possible-to-read-a-files-modif
 inotify
 http://man7.org/linux/man-pages/man7/inotify.7.html#SEE_ALSO
 
+or in case
+http://stackoverflow.com/questions/10197254/ruby-case-statement-with-multiple-values-in-each-when-block
+
+optional parm
+http://codeloveandboards.com/blog/2014/02/05/ruby-and-method-arguments/
+
+argument error
+http://ruby-doc.org/core-1.9.3/ArgumentError.html
+
