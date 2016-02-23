@@ -1,7 +1,7 @@
 require "test/unit"
 require "stringio"
-require_relative "fileWatch/fileWatch.rb"
-include FileWatch
+#require_relative "fileWatch/fileWatch.rb"
+#include FileWatch
 class Project2Test < Test::Unit::TestCase
 
     def time_leeway
@@ -9,21 +9,25 @@ class Project2Test < Test::Unit::TestCase
     end
 
 
-    def test_message_bad_input
-        message = "message"
-
-        out = capture_stdout do
-            system("ruby ./message/message_driver.rb 0 " + message)
-        end
-
-        sleep(5)
-        assert_equal(out.string, message)
+    def test_message_normal_operation
+        out = `ruby ./message/message_driver.rb 0 message`
+        assert_equal(out, "message\n")
     end
 
-    def test_message_overflow
-
+    def test_message_num_inputs_wrong
+        out = `ruby ./message/message_driver.rb message`
+        assert_equal(out, "Please use the form: driver duration message, where driver is the executable file.\n")
     end
 
+    def test_message_not_a_duration
+        out = `ruby ./message/message_driver.rb notaduration message`
+        assert_equal(out, "The first parameter must be an integer between 0 and 999,999,999.\n")
+    end
+
+    def test_message_duration_overflow
+        out = `ruby ./message/message_driver.rb 1000000000 message`
+        assert_equal(out, "The max duration value is 999,999,999.\n")
+    end
 
     def test_pipe_watch_destroy_no_timing
         destroyed = false
@@ -525,19 +529,6 @@ class Project2Test < Test::Unit::TestCase
         assert_in_delta(duration, after_alteration - before_alteration, time_leeway  , "Action not activated in the appointed time.")
         `rm -f #{fileName}`
         assert_equal($?.exitstatus, 0, "couldn't remove file")
-    end
-
-end
-
-module Kernel
-
-    def capture_stdout
-        out = StringIO.new
-        $stdout = out
-        yield
-        return out
-    ensure
-        $stdout = STDOUT
     end
 
 end
