@@ -49,3 +49,5 @@ http://codeloveandboards.com/blog/2014/02/05/ruby-and-method-arguments/
 argument error
 http://ruby-doc.org/core-1.9.3/ArgumentError.html
 
+Module Variables
+http://stackoverflow.com/questions/5690458/create-module-variables-in-ruby
