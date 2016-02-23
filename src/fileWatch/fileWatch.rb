@@ -9,15 +9,11 @@ module FileWatch
     class ActionNotPerformed < StandardError
     end
 
-    def is_a_file?(name)
-        false unless name.include? "."
-        true
-    end
-
     def format_and_check_files(files)
         case files
         when Array
-            files.each {|file| raise TypeError unless file.is_a? String}
+            raise ArgumentError, "There must be at least one file to watch." if files.empty?
+            files.each {|file| raise TypeError, "Filename must be a string." unless file.is_a? String}
         when String
             #files.include? "," ? files = files.split(",") : files = [files]
             if (files.include? ",")
@@ -26,20 +22,37 @@ module FileWatch
                 files = [files]
             end
         else
-            raise TypeError
+            raise TypeError, "Files must be present as a comma-separated string or a list of strings."
         end
         return files
     end
 
     def check_duration(duration)
-	#http://rubylearning.com/satishtalim/ruby_exceptions.html
-        raise TypeError, "duration must be a Numeric value greater than or equal to 0." unless
+	    #http://rubylearning.com/satishtalim/ruby_exceptions.html
+        raise TypeError, "Duration must be a Numeric value greater than or equal to 0." unless
             ((duration.is_a? Numeric) && (duration >= 0))
+        return duration
     end
 
-    def FileWatchCreation(duration, files, &main_action)
-        check_duration(duration)
-        files = format_and_check_files(files)
+    def preconditions_check(args, &main_action)
+        duration = args[0]
+        files = args[1]
+        raise ArgumentError, "Action required." unless block_given?
+        case duration
+        when Numeric
+            files = format_and_check_files(files)
+            duration = check_duration(duration)
+        when Array, String
+            files = format_and_check_files(duration)
+            duration = 0
+        else
+            raise ArgumentError, "Action"
+        end
+        return [duration,files]
+    end
+
+    def FileWatchCreation(*args, &main_action)
+        duration, files = preconditions_check(args, &main_action)
 
         postcondition = false
         action = Proc.new {
@@ -59,9 +72,8 @@ module FileWatch
         }
     end
 
-    def FileWatchAlter(duration, files, &main_action)
-        check_duration(duration)
-        files = format_and_check_files(files)
+    def FileWatchAlter(*args, &main_action)
+        duration, files = preconditions_check(args, &main_action)
         files.each {|file|
             raise FileNotFound, "File must exist." unless File.exist?(file)
         }
@@ -93,9 +105,8 @@ module FileWatch
         end
     end
 
-    def FileWatchDestroy(duration, files, &main_action)
-        check_duration(duration)
-        files = format_and_check_files(files)
+    def FileWatchDestroy(*args, &main_action)
+        duration, files = preconditions_check(args, &main_action)
         files.each {|file|
             raise FileNotFound, "File must exist." unless File.exist?(file)
         }
