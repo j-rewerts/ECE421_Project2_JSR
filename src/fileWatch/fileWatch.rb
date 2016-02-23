@@ -1,4 +1,5 @@
 require 'rb-inotify'
+
 module FileWatch
     # http://blog.honeybadger.io/ruby-custom-exceptions/
 
@@ -9,8 +10,11 @@ module FileWatch
     class ActionNotPerformed < StandardError
     end
 
-    @@files_arg_requirements = "Files must be present as a comma-separated string ('file1.txt,dir2,...') or a list of strings (['dir1','file2.txt',...])."
-    @@duration_arg_requirements = "When provided, Duration is in seconds and must be a Numeric value greater than or equal to 0."
+    @@files_arg_requirements = "Files must be present as a comma-separated string"\
+                               " ('file1.txt,dir2,...') or a list of strings "\
+                               " (['dir1','file2.txt',...])."
+    @@duration_arg_requirements = "When provided, Duration is in seconds and must "\
+                                  "be a Numeric value greater than or equal to 0."
 
     def format_and_check_files(files)
         case files
@@ -29,6 +33,7 @@ module FileWatch
         end
         return files
     end
+
 
     def check_duration(duration)
 	    #http://rubylearning.com/satishtalim/ruby_exceptions.html
@@ -74,6 +79,7 @@ module FileWatch
             end
             create_thread.priority = -1
         }
+        return nil
     end
 
     def FileWatchAlter(*args, &main_action)
@@ -107,6 +113,7 @@ module FileWatch
                 raise e
             end
         end
+        return nil
     end
 
     def FileWatchDestroy(*args, &main_action)
@@ -144,5 +151,6 @@ module FileWatch
                 raise e
             end
         end
+        return nil
     end
 end
