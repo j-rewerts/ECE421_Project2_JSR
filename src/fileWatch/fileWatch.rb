@@ -122,12 +122,6 @@ module FileWatch
             files.each {
                 |file| watcher.watch(file, :delete_self, &action)
             }
-            postcondition = false
-            action = Proc.new {
-                sleep(duration)
-                main_action.call
-                postcondition = true
-            }
 
             destory_thread = Thread.new do
                 watcher.run
