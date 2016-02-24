@@ -9,6 +9,8 @@ module FileWatch
     end
     class ActionNotPerformed < StandardError
     end
+    class DurationInvariantChanged < StandardError
+    end
 
     @@files_arg_requirements = "Files must be present as a comma-separated string"\
                                " ('file1.txt,dir2,...') or a list of strings "\
@@ -33,7 +35,6 @@ module FileWatch
         end
         return files
     end
-
 
     def check_duration(duration)
 	    #http://rubylearning.com/satishtalim/ruby_exceptions.html
@@ -62,7 +63,7 @@ module FileWatch
 
     def FileWatchCreation(*args, &main_action)
         duration, files = preconditions_check(args, &main_action)
-
+        duration_before = duration
         postcondition = false
         action = Proc.new {
             sleep(duration)
@@ -79,11 +80,13 @@ module FileWatch
             end
             create_thread.priority = -1
         }
+        raise DurationInvariantChanged unless duration_before == duration
         return nil
     end
 
     def FileWatchAlter(*args, &main_action)
         duration, files = preconditions_check(args, &main_action)
+        duration_before = duration
         files.each {|file|
             raise FileNotFound, "File must exist." unless File.exist?(file)
         }
@@ -113,11 +116,13 @@ module FileWatch
                 raise e
             end
         end
+        raise DurationInvariantChanged unless duration_before == duration
         return nil
     end
 
     def FileWatchDestroy(*args, &main_action)
         duration, files = preconditions_check(args, &main_action)
+        duration_before = duration
         files.each {|file|
             raise FileNotFound, "File must exist." unless File.exist?(file)
         }
@@ -151,6 +156,7 @@ module FileWatch
                 raise e
             end
         end
+        raise DurationInvariantChanged unless duration_before == duration
         return nil
     end
 end
