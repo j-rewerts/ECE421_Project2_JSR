@@ -1,6 +1,6 @@
 class Shell
 
-    @@commands = ["cd", "ls", "dir", "pwd", "cwd", "help", "history", "open"
+    @@commands = ["cd", "ls", "dir", "pwd", "cwd", "help", "history", 
                   "exit", "quit"]
 
                   
