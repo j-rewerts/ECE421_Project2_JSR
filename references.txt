@@ -40,3 +40,9 @@ http://stackoverflow.com/questions/10580728/is-it-possible-to-read-a-files-modif
 inotify
 http://man7.org/linux/man-pages/man7/inotify.7.html#SEE_ALSO
 
+
+
+Ruby Shell Stuff:
+http://tech.natemurray.com/2007/03/ruby-shell-commands.html
+http://ruby-doc.org/stdlib-2.2.3/libdoc/shell/rdoc/Shell.html
+http://blog.honeybadger.io/understanding-rubys-strange-errno-exceptions/
